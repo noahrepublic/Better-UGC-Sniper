@@ -23,14 +23,15 @@ Download it as a zip folder
 
  *Do not download Python off of Microsoft Store, it will take extra steps to download PIP*
 
-    Download Python: https://www.python.org/downloads/
+A. Download Python: https://www.python.org/downloads/
 
-    Go to the bot's directory
+B. Go to the bot's directory
 
+C. Open a CMD in that directory
 
-    Open a CMD in that directory
+Run the following command: 
 
-    Run the following command: "python3 pip install -r requirements.txt"
+    "python3 pip install -r requirements.txt"
 
 ## Run
 
