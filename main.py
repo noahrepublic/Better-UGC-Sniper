@@ -4,15 +4,19 @@ import os
 import uuid
 import time
 import datetime
-import winreg
 
-path = winreg.HKEY_CURRENT_USER
-robloxcom = winreg.OpenKeyEx(path, r"SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com")
+try:
+    import winreg
 
-with open("limiteds.txt", "r") as f:
-    limiteds = f.read().replace(" ", "").split(",")
+    path = winreg.HKEY_CURRENT_USER
+    robloxcom = winreg.OpenKeyEx(path, r"SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com")
 
-cookie = str(winreg.QueryValueEx(robloxcom, ".ROBLOSECURITY")[0]) 
+
+
+    cookie = str(winreg.QueryValueEx(robloxcom, ".ROBLOSECURITY")[0]) 
+except:
+    print("Regex failed, either isn't supported on your platform or you are not logged in studio.")
+    cookie = None
 
 
 if cookie:
@@ -30,7 +34,8 @@ else:
     with open("cookie.txt", "r") as f:
         cookie = f.read()
 
-
+with open("limiteds.txt", "r") as f:
+    limiteds = f.read().replace(" ", "").split(",")
 
 user_id = r.get("https://users.roblox.com/v1/users/authenticated", cookies={".ROBLOSECURITY": cookie}).json()["id"]
 x_token = ""
@@ -131,6 +136,7 @@ while 1:
                 buy(info, info["collectibleItemId"], productid)
             except:
                 print("Caught an error")
+                continue
 
     taken = time.perf_counter()-start
     if taken < cooldown:
