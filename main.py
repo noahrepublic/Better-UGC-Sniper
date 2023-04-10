@@ -97,7 +97,7 @@ def getXToken():
             time.sleep(180)
 
 
-def buyLimited(info, productId):
+def buyLimited(info, productId, limited):
     itemId = info["collectibleItemId"]
 
     data = {
@@ -121,9 +121,32 @@ def buyLimited(info, productId):
         response = r.post(
             f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item", json=data, cookies=session.cookies, headers=session.headers)
 
-        if response.reason == "Too Many Requests":
-            print("Rate limited", response.status_code)
+        if response.status_code == 429:
+            print("Rate limited")
             time.sleep(0.25)
+        if response.status_code == 503:
+            print("Out of stock! Or website crashed")
+
+            # validate if it's out of stock or not
+
+            info = session.post("https://catalog.roblox.com/v1/catalog/items/details",
+                      json={"items": [{"itemType": "Asset", "id": int(limited)}]})
+            
+            try:
+                left = info.json()["data"][0]["unitsAvailableForConsumption"]
+            except:
+                print(f"Failed getting stock. Full log: {info.text} - {info.reason}")
+                left = 0
+
+            if left == 0:
+                available = False
+            
+                print("Out of stock")
+
+            continue
+        if response.status_code == 500:
+            print("Invalid parameters (Roblox issue)")
+            continue
 
         try:
             response = response.json()
@@ -134,6 +157,7 @@ def buyLimited(info, productId):
 
         if response["purchased"]:
             print("Bought " + info["name"])
+
 
 
 def checkLimiteds():
@@ -161,7 +185,7 @@ def checkLimiteds():
                     print("You were unauthorized, check your ROBLOSECURITY?")
                 continue
 
-            buyLimited(limitedInfo, productId)
+            buyLimited(limitedInfo, productId, limited)
 
     
 
