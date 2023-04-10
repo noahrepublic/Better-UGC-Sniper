@@ -23,7 +23,7 @@ os.system("cls")
 print("UGC Sniper by noahrepublic#4323, support server: https://discord.com/invite/Kk8n2QpFCb")
 print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
-userId = None
+
 limiteds = []
 perCooldown = 0.75
 
@@ -33,6 +33,7 @@ with open("limiteds.txt", "r") as f:
 
 def getCookie():
     global cookie
+    global userId
 
     with open("config.json", "r") as f:
             config = json.load(f)
@@ -99,16 +100,15 @@ def getXToken():
 def buyLimited(info, productId):
     itemId = info["collectibleItemId"]
 
-
-    session.json = {
+    data = {
         "collectibleProductId": productId,
         "collectibleItemId": itemId,
         "expectedCurrency": 1,
-        "expectedPrice": 0,
+        "expectedPrice": 36,
         "expectedPurchaserId": userId,
         "expectedPurchaserType": "User",
         "expectedSellerId": info["creatorTargetId"],
-        "expectedSellerType": "User",
+        "expectedSellerType": "User"
     }
 
     print("Buying " + info["name"])
@@ -116,11 +116,10 @@ def buyLimited(info, productId):
     available = True
 
     while available:
-        session.json["idempotencyKey"] = str(uuid.uuid4())
-
+        data["idempotencyKey"] = str(uuid.uuid4())
         
-        response = session.post(
-            f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item")
+        response = r.post(
+            f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item", json=data, cookies=session.cookies, headers=session.headers)
 
         if response.reason == "Too Many Requests":
             print("Rate limited", response.status_code)
@@ -129,12 +128,13 @@ def buyLimited(info, productId):
         try:
             response = response.json()
         except:
-            print(response.reason)
+            print("Failed to buy " + info["name"] + " reason: " + response.reason + str(response.status_code))
             continue
             
 
         if response["purchased"]:
             print("Bought " + info["name"])
+            break
 
 
 def checkLimiteds():
@@ -144,6 +144,7 @@ def checkLimiteds():
         try:
             limitedInfo = session.post("https://catalog.roblox.com/v1/catalog/items/details",
                            json={"items": [{"itemType": "Asset", "id": int(limited)}]}).json()["data"][0]
+            
         except KeyError:
             print("Rate limited")
             time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
@@ -155,15 +156,14 @@ def checkLimiteds():
         
             try:
                 productId = productId.json()[0]["collectibleProductId"]
-                
-
-                buyLimited(limitedInfo, productId)
             except:
                 print("Could not get product reason: " + productId.reason + str(productId.status_code))
 
                 if productId.reason == "Unauthorized":
                     print("You were unauthorized, check your ROBLOSECURITY?")
                 continue
+
+            buyLimited(limitedInfo, productId)
 
     
 
@@ -177,7 +177,6 @@ if __name__ == "__main__":
 
     session = r.Session()
     session.cookies[".ROBLOSECURITY"] = cookie
-    session.headers["Content-Type"] = "application/json"
 
 
     Thread(target=getXToken).start()
@@ -200,6 +199,6 @@ if __name__ == "__main__":
             time.sleep(totalCooldown - (end - start))
 
         os.system("cls")
-        print("Taken: " + str(round(time.perf_counter()-start, 4)))
+        print("Time taken: " + str(round(time.perf_counter()-start, 4)))
         
     
