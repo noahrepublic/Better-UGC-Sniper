@@ -104,7 +104,7 @@ def buyLimited(info, productId):
         "collectibleProductId": productId,
         "collectibleItemId": itemId,
         "expectedCurrency": 1,
-        "expectedPrice": 36,
+        "expectedPrice": 0,
         "expectedPurchaserId": userId,
         "expectedPurchaserType": "User",
         "expectedSellerId": info["creatorTargetId"],
@@ -130,12 +130,11 @@ def buyLimited(info, productId):
             response = response.json()
         except:
             print(response.reason)
+            continue
             
 
         if response["purchased"]:
             print("Bought " + info["name"])
-
-        print(response.reason, response.status_code)
 
 
 def checkLimiteds():
