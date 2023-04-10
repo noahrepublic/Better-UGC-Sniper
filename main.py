@@ -104,7 +104,7 @@ def buyLimited(info, productId):
         "collectibleProductId": productId,
         "collectibleItemId": itemId,
         "expectedCurrency": 1,
-        "expectedPrice": 36,
+        "expectedPrice": 0,
         "expectedPurchaserId": userId,
         "expectedPurchaserType": "User",
         "expectedSellerId": info["creatorTargetId"],
@@ -134,7 +134,6 @@ def buyLimited(info, productId):
 
         if response["purchased"]:
             print("Bought " + info["name"])
-            break
 
 
 def checkLimiteds():
@@ -157,7 +156,6 @@ def checkLimiteds():
             try:
                 productId = productId.json()[0]["collectibleProductId"]
             except:
-                print("Could not get product reason: " + productId.reason + str(productId.status_code))
 
                 if productId.reason == "Unauthorized":
                     print("You were unauthorized, check your ROBLOSECURITY?")
