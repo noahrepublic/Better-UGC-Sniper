@@ -47,6 +47,8 @@ else:
 with open("limiteds.txt", "r") as f:
     limiteds = f.read().replace(" ", "").split(",")
 
+totalCooldown = int(input("Input cooldown across all limiteds (seconds) E.g. 1 second, 3 limiteds, .33 second break between each check: "))
+
 user_id = r.get("https://users.roblox.com/v1/users/authenticated", cookies={".ROBLOSECURITY": cookie}).json()["id"]
 x_token = ""
 def get_x_token():
@@ -123,7 +125,7 @@ while x_token == "":
 # https://apis.roblox.com/marketplace-items/v1/items/details
 # https://catalog.roblox.com/v1/catalog/items/details
 
-cooldown = 60/(80/len(limiteds))
+cooldown = totalCooldown/len(limiteds)
 while 1:
     start = time.perf_counter()
 
