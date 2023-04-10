@@ -1,160 +1,206 @@
 import requests as r
+import json
 from threading import Thread
-import os
 import uuid
+import os
 import time
 import datetime
 
+
 print("Checking for updates...")
-script = r.get("https://raw.githubusercontent.com/noahrepublic/Better-UGC-Sniper/main/main.py").text
-with open("main.py", "r") as f:
-    if f.read() != script:
-        print("Updating...")
-        with open("main.py", "w") as f:
-            f.write(script)
-            input("Updated please reopen the script")
-            exit(0)
-
-try:
-    import winreg
-
-    path = winreg.HKEY_CURRENT_USER
-    robloxcom = winreg.OpenKeyEx(path, r"SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com")
+# script = r.get("https://raw.githubusercontent.com/noahrepublic/Better-UGC-Sniper/main/main.py").text
+# with open("main.py", "r") as f:
+   # if f.read() != script:
+       # print("Updating...")
+        # with open("main.py", "w") as f:
+            # f.write(script)
+            # input("Updated please reopen the script")
+            # exit(0)
 
 
+os.system("cls")
 
-    cookie = str(winreg.QueryValueEx(robloxcom, ".ROBLOSECURITY")[0]) 
-except:
-    print("Regex failed, either isn't supported on your platform or you are not logged in studio.")
-    cookie = None
+print("UGC Sniper by noahrepublic#4323, support server: https://discord.com/invite/Kk8n2QpFCb")
+print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
-
-if cookie:
-    cookie = cookie.split("<")[3]
-    cookie = cookie.split(">")[0]
-    cookie = cookie.strip()
-
-    try:
-        user_id = r.get("https://users.roblox.com/v1/users/authenticated", cookies={".ROBLOSECURITY": cookie}).json()["id"]
-        print("Automatically found cookie.")
-    except:
-        with open("cookie.txt", "r") as f:
-            cookie = f.read()
-else:
-    with open("cookie.txt", "r") as f:
-        cookie = f.read()
+userId = None
+limiteds = []
+perCooldown = 0.75
 
 with open("limiteds.txt", "r") as f:
-    limiteds = f.read().replace(" ", "").split(",")
-
-totalCooldown = int(input("Input cooldown across all limiteds (seconds) E.g. 1 second, 3 limiteds, .33 second break between each check: "))
-
-user_id = r.get("https://users.roblox.com/v1/users/authenticated", cookies={".ROBLOSECURITY": cookie}).json()["id"]
-x_token = ""
-def get_x_token():
-    global x_token
-
-    x_token = r.post("https://auth.roblox.com/v2/logout",
-                     cookies={".ROBLOSECURITY": cookie}).headers["x-csrf-token"]
-    print("Logged in.")
-
-    while 1:
-        # Gets the x_token every 4 minutes.
-        x_token = r.post("https://auth.roblox.com/v2/logout",
-                         cookies={".ROBLOSECURITY": cookie}).headers["x-csrf-token"]
-        time.sleep(248)
+    limiteds = f.read().replace(" ", "").replace("\n", "").split(",")
 
 
-def buy(json, itemid, productid):
-    print("Spam buying limited...")
+def getCookie():
+    global cookie
 
-    data = {
-        "collectibleItemId": itemid,
+    with open("config.json", "r") as f:
+            config = json.load(f)
+            cookie = config["ROBLOSECURITY"]
+
+            f.close()
+
+    try:
+        userId = r.get("https://users.roblox.com/v1/users/authenticated",
+                       cookies={".ROBLOSECURITY": cookie}).json()["id"]
+    except:
+        print("ROBLOSECURITY is invalid, trying to find ROBLOSECURITY in registry...")
+        cookie = None
+
+    if cookie == None:
+
+        try:
+            import winreg
+
+            path = winreg.HKEY_CURRENT_USER
+            robloxcom = winreg.OpenKeyEx(
+                path, r"SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com")
+
+            cookie = str(winreg.QueryValueEx(robloxcom, ".ROBLOSECURITY")[0])
+        except:
+            print(
+                "Regex failed, either isn't supported on your system or you are not logged in studio.")
+            cookie = None
+
+        if cookie:
+            cookie = cookie.split("<")[3]
+            cookie = cookie.split(">")[0]
+            cookie = cookie.strip()
+
+            try:
+                userId = r.get("https://users.roblox.com/v1/users/authenticated",
+                               cookies={".ROBLOSECURITY": cookie}).json()["id"]
+                print("Automatically found ROBLOSECURITY.")
+            except:
+                print(
+                    "Could not automatically find ROBLOSECURITY. Please enter it manually.")
+                exit(0)
+
+
+def getXToken():
+    global xToken
+
+    while True:
+        try:
+            xToken = session.post(
+                "https://auth.roblox.com/").headers['X-CSRF-TOKEN']
+        except:
+            xToken = None
+
+        if not xToken:
+            print("Failed to get x-csrf-token. Site may be down. Retrying in 5...")
+
+            time.sleep(5)
+        else:
+            session.headers["X-CSRF-TOKEN"] = xToken
+            time.sleep(180)
+
+
+def buyLimited(info, productId):
+    itemId = info["collectibleItemId"]
+
+
+    session.json = {
+        "collectibleProductId": productId,
+        "collectibleItemId": itemId,
         "expectedCurrency": 1,
-        "expectedPrice": 0,
-        "expectedPurchaserId": user_id,
+        "expectedPrice": 36,
+        "expectedPurchaserId": userId,
         "expectedPurchaserType": "User",
-        "expectedSellerId": json["creatorTargetId"],
+        "expectedSellerId": info["creatorTargetId"],
         "expectedSellerType": "User",
-        "idempotencyKey": "random uuid4 string that will be your key or smthn",
-        "collectibleProductId": productid
     }
 
-    while 1:
-        data["idempotencyKey"] = str(uuid.uuid4())
-        bought = r.post(f"https://apis.roblox.com/marketplace-sales/v1/item/{itemid}/purchase-item", json=data,
-            headers={"x-csrf-token": x_token}, cookies={".ROBLOSECURITY": cookie})
+    print("Buying " + info["name"])
 
-        if bought.reason == "Too Many Requests":
-            print("Ran into a ratelimit resuming trying again shortly...")
-            time.sleep(0.5)
-            continue
+    available = True
+
+    while available:
+        session.json["idempotencyKey"] = str(uuid.uuid4())
+
+        
+        response = session.post(
+            f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item")
+
+        if response.reason == "Too Many Requests":
+            print("Rate limited", response.status_code)
+            time.sleep(0.25)
 
         try:
-            bought = bought.json()
+            response = response.json()
         except:
-            print(bought.reason)
-            print("Json decoder error whilst trying to buy item.")
-            continue
-
-        if not bought["purchased"]:
-            print(f"Failed buying the limited, trying again.. Info: {bought} - {data}")
-        else:
-            print(f"Successfully bought the limited! Info: {bought} - {data}")
+            print(response.reason)
             
 
-        try:
-            info = r.post("https://catalog.roblox.com/v1/catalog/items/details",
-                      json={"items": [{"itemType": "Asset", "id": int(limited)}]},
-                      headers={"x-csrf-token": x_token}, cookies={".ROBLOSECURITY": cookie}).json()["data"][0]
-        except:
-            info = {"unitsAvailableForConsumption": 1}
+        if response["purchased"]:
+            print("Bought " + info["name"])
 
-        if info["unitsAvailableForConsumption"] == 0:
-            print("Couldn't buy the limited in time. Better luck next time.")
-            return
+        print(response.reason, response.status_code)
 
 
-# Get collectible and product id for all the limiteds.
-Thread(target=get_x_token).start()
-
-print("Better-UGC-Sniper, upgraded by noahrepublic#4323 \nDiscord server: https://discord.com/invite/Kk8n2QpFCb")
-while x_token == "":
-    time.sleep(0.01)
-
-# https://apis.roblox.com/marketplace-items/v1/items/details
-# https://catalog.roblox.com/v1/catalog/items/details
-
-cooldown = totalCooldown/len(limiteds)
-while 1:
-    start = time.perf_counter()
+def checkLimiteds():
+    print("Checking limiteds...")
 
     for limited in limiteds:
         try:
-            info = r.post("https://catalog.roblox.com/v1/catalog/items/details",
-                           json={"items": [{"itemType": "Asset", "id": int(limited)}]},
-                           headers={"x-csrf-token": x_token}, cookies={".ROBLOSECURITY": cookie}).json()["data"][0]
+            limitedInfo = session.post("https://catalog.roblox.com/v1/catalog/items/details",
+                           json={"items": [{"itemType": "Asset", "id": int(limited)}]}).json()["data"][0]
         except KeyError:
-            print("Ratelimit! Waiting for next minute to start")
-            time.sleep(60-int(datetime.datetime.now().second))
+            print("Rate limited")
+            time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
             continue
 
-        if info.get("priceStatus", "") != "Off Sale":
+        if limitedInfo.get("priceStatus", "") != "Off Sale" and limitedInfo.get("collectibleItemId") is not None:
+            productId = session.post("https://apis.roblox.com/marketplace-items/v1/items/details",
+                    json={"itemIds": [limitedInfo["collectibleItemId"]]})
+        
             try:
-                productid = r.post("https://apis.roblox.com/marketplace-items/v1/items/details",
-                    json={"itemIds": [info["collectibleItemId"]]},
-                    headers={"x-csrf-token": x_token}, cookies={".ROBLOSECURITY": cookie}).json()[0]["collectibleProductId"]
+                productId = productId.json()[0]["collectibleProductId"]
+                
 
-                buy(info, info["collectibleItemId"], productid)
+                buyLimited(limitedInfo, productId)
             except:
-                print("Caught an error")
+                print("Could not get product reason: " + productId.reason + str(productId.status_code))
+
+                if productId.reason == "Unauthorized":
+                    print("You were unauthorized, check your ROBLOSECURITY?")
                 continue
 
-    taken = time.perf_counter()-start
-    if taken < cooldown:
-        time.sleep(cooldown-taken)
+    
 
-    os.system("cls")
-    print("Check done.\n"
-          f"Time taken: {round(time.perf_counter()-start, 3)}\n"
-          f"Ideal time: {round(cooldown, 3)}")
+if __name__ == "__main__":
+    getCookie()
+   
+    while not cookie:
+        time.sleep(0.1)
+
+    global session
+
+    session = r.Session()
+    session.cookies[".ROBLOSECURITY"] = cookie
+    session.headers["Content-Type"] = "application/json"
+
+
+    Thread(target=getXToken).start()
+
+    while not session.headers.get("X-CSRF-TOKEN", ""): # Wait for the xToken to be set
+        time.sleep(0.1)
+
+    totalCooldown = len(limiteds) * perCooldown
+
+    
+
+    while True:
+        start = time.perf_counter()
+
+        checkLimiteds()
+
+        end = time.perf_counter()
+
+        if end - start < totalCooldown:
+            time.sleep(totalCooldown - (end - start))
+
+        os.system("cls")
+        print("Taken: " + str(round(time.perf_counter()-start, 4)))
+        
+    
