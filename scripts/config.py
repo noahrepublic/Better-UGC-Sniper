@@ -19,7 +19,7 @@ except:
     
 config["ROBLOSECURITY"] = roblosecurity
 
-cooldownPerLimited = input("Enter cooldown per limited (in seconds): ")
+cooldownPerLimited = input("Enter cooldown per limited (Recommended: 0.75): ")
 config["cooldownPerLimited"] = float(cooldownPerLimited)
 
 jsonObject = json.dumps(config, indent=4)
