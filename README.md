@@ -19,27 +19,20 @@ Download it as a zip folder
 
 ## 2. Install Python & Requirements
 
- *Do not download Python off of Microsoft Store, it will take extra steps to download PIP*
-
-A. Download Python: https://www.python.org/downloads/
+A. Download Python from the Microsoft store, or their website: https://www.python.org/downloads/ anything 3.9+
 
 B. Go to the bot's directory
 
-C. Open a CMD in that directory
+C. Run the bat file named "run"
 
-Run the following command: 
 
-    "python3 pip install -r requirements.txt"
+## 3. Configure your cookie
 
+Once you start the bat file, type 1 and press enter
+
+It should bring you to the configuration, fill that out.
+
+### How to get your cookie: https://youtu.be/hd6xWydE1K0
 ## Run
 
-The script automatically detects your .ROBLOSECURITY if you are currently logged into Roblox Studio. 
-
-Run the following command in that directories CMD:
-
-    python main.py
-
-
-## In case that it errors from invalid cookie, manually get your .ROBLOSECURITY and place it in "cookie.txt" 
-
-How to get your cookie: https://youtu.be/hd6xWydE1K0
+Open the batch file again, and this time press 2
