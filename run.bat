@@ -1,5 +1,11 @@
 @echo off
 
+echo Checking for pip...
+python3 -m ensurepip --upgrade
+
+echo Installing requirements...
+python3 -m pip install -r ./requirements.txt
+
 :ui
 cls
 title UGC-Sniper Config Editor by noahrepublic#4323
