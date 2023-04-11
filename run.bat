@@ -1,8 +1,5 @@
 @echo off
 
-echo Checking for python...
-winget install -e --id Python.Python.3.11
-
 echo Checking for pip...
 python -m ensurepip --upgrade
 
