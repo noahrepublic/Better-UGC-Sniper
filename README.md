@@ -19,7 +19,7 @@ Download it as a zip folder
 
 ## 2. Install Python & Requirements
 
-A. Download Python from the Microsoft store (3.11 recommended, but anything above 3.9)
+A. Download Python from THEIR WEBSITE: https://www.python.org/ (Newest version recommended 3.11.3)
 
 B. Go to the bot's directory
 
