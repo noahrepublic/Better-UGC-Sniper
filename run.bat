@@ -1,10 +1,6 @@
 @echo off
 
-echo Checking for pip...
-python -m ensurepip --upgrade
-
-echo Installing requirements...
-python -m pip install -r ./requirements.txt
+python ./scripts/startcheck.py
 
 :ui
 cls
@@ -28,6 +24,7 @@ goto ui
 
 :start
 cls
+python ./scripts/update.py
 python ./main.py
 pause
 goto ui
