@@ -6,3 +6,4 @@ if not os.path.exists("./config.json"):
 
     print("Installing required packages")
     os.system("python -m pip install -r ./requirements.txt")
+    exit(0)
