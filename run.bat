@@ -22,7 +22,7 @@ pause
 
 :config
 cls
-python3 ./scripts/config.py
+python3 %cd%/scripts/config.py
 goto ui
 
 
