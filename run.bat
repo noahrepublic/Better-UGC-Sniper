@@ -1,5 +1,8 @@
 @echo off
 
+echo Checking for python...
+winget install -e --id Python.Python.3.11
+
 echo Checking for pip...
 python3 -m ensurepip --upgrade
 
@@ -28,6 +31,6 @@ goto ui
 
 :start
 cls
-python3 pip install -r requirements.txt
-python3 main.py
+python3 %cd%/main.py
+pause
 goto ui
