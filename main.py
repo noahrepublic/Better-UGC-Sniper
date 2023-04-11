@@ -6,18 +6,6 @@ import os
 import time
 import datetime
 
-
-print("Checking for updates...")
-script = r.get("https://raw.githubusercontent.com/noahrepublic/Better-UGC-Sniper/main/main.py").text
-with open("main.py", "r") as f:
-   if f.read() != script:
-        print("Updating...")
-        with open("main.py", "w") as f:
-            f.write(script)
-            input("Updated please reopen the script")
-            exit(0)
-
-
 os.system("cls")
 
 print("UGC Sniper by noahrepublic#4323, support server: https://discord.com/invite/Kk8n2QpFCb")
@@ -25,7 +13,7 @@ print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
 
 limiteds = []
-perCooldown = 0.75
+
 
 with open("limiteds.txt", "r") as f:
     limiteds = f.read().replace(" ", "").replace("\n", "").split(",")
@@ -34,12 +22,20 @@ with open("limiteds.txt", "r") as f:
 def getCookie():
     global cookie
     global userId
+    global perCooldown
 
-    with open("config.json", "r") as f:
-            config = json.load(f)
-            cookie = config["ROBLOSECURITY"]
+    try:
+        with open("config.json", "r") as f:
+                config = json.load(f)
+                cookie = config["ROBLOSECURITY"]
 
-            f.close()
+                perCooldown = config["cooldownPerLimited"]
+
+                f.close()
+    except:
+        cookie = None
+        perCooldown = 0.75
+
 
     try:
         userId = r.get("https://users.roblox.com/v1/users/authenticated",
@@ -84,7 +80,9 @@ def getXToken():
     while True:
         try:
             xToken = session.post(
-                "https://auth.roblox.com/").headers['X-CSRF-TOKEN']
+                "https://auth.roblox.com/").headers["x-csrf-token"]
+
+            reserveRequests = False
         except:
             xToken = None
 
@@ -94,7 +92,7 @@ def getXToken():
             time.sleep(5)
         else:
             session.headers["X-CSRF-TOKEN"] = xToken
-            time.sleep(180)
+            time.sleep(248)
 
 
 def buyLimited(info, productId, limited):
@@ -164,6 +162,7 @@ def checkLimiteds():
     print("Checking limiteds...")
 
     for limited in limiteds:
+
         try:
             limitedInfo = session.post("https://catalog.roblox.com/v1/catalog/items/details",
                            json={"items": [{"itemType": "Asset", "id": int(limited)}]}).json()["data"][0]
@@ -205,6 +204,8 @@ if __name__ == "__main__":
 
     while not session.headers.get("X-CSRF-TOKEN", ""): # Wait for the xToken to be set
         time.sleep(0.1)
+
+    
 
     totalCooldown = len(limiteds) * perCooldown
 
