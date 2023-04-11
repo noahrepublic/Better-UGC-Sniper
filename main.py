@@ -15,6 +15,10 @@ print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
 limiteds = []
 
+
+global start
+start = 0
+
 with open("limiteds.txt", "r") as f:
     limiteds = f.read().replace(" ", "").replace("\n", "").split(",")
 
@@ -122,6 +126,7 @@ def buyLimited(info, productId, limited):
         if response.status_code == 429:
             print("Rate limited")
             time.sleep(0.25)
+ 
         if response.status_code == 503:
             print("Out of stock! Or website crashed")
 
@@ -161,6 +166,9 @@ def buyLimited(info, productId, limited):
 def checkLimiteds():
     print("Checking limiteds...")
 
+
+    global start
+
     for limited in limiteds:
 
         try:
@@ -169,8 +177,9 @@ def checkLimiteds():
             
         except KeyError:
             print("Rate limited")
-            time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
             start += (60-int(datetime.datetime.now().second))
+            time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
+          
             continue
 
         if limitedInfo.get("priceStatus", "") != "Off Sale" and limitedInfo.get("collectibleItemId") is not None:
@@ -210,7 +219,6 @@ if __name__ == "__main__":
 
     totalCooldown = len(limiteds) * perCooldown
 
-    global start
 
     while True:
         start = time.perf_counter()
