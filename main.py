@@ -149,7 +149,7 @@ def buyLimited(info, productId, limited):
         try:
             response = response.json()
         except:
-            print("Failed to buy " + info["name"] + " reason: " + response.reason + str(response.status_code))
+            print("Failed to buy ")
             continue
             
 
