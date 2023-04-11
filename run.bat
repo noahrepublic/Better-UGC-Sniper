@@ -4,10 +4,10 @@ echo Checking for python...
 winget install -e --id Python.Python.3.11
 
 echo Checking for pip...
-python3 -m ensurepip --upgrade
+python -m ensurepip --upgrade
 
 echo Installing requirements...
-python3 -m pip install -r ./requirements.txt
+python -m pip install -r ./requirements.txt
 
 :ui
 cls
@@ -25,12 +25,12 @@ pause
 
 :config
 cls
-python3 %cd%/scripts/config.py
+python ./scripts/config.py
 goto ui
 
 
 :start
 cls
-python3 %cd%/main.py
+python ./main.py
 pause
 goto ui
