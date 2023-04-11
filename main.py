@@ -5,6 +5,7 @@ import uuid
 import os
 import time
 import datetime
+import queue
 
 os.system("cls")
 
@@ -13,7 +14,6 @@ print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
 
 limiteds = []
-
 
 with open("limiteds.txt", "r") as f:
     limiteds = f.read().replace(" ", "").replace("\n", "").split(",")
@@ -79,20 +79,20 @@ def getXToken():
 
     while True:
         try:
-            xToken = session.post(
-                "https://auth.roblox.com/").headers["x-csrf-token"]
+            response = session.post(
+                "https://auth.roblox.com/")
+            
+            xToken = response.headers["x-csrf-token"]
 
             reserveRequests = False
         except:
             xToken = None
 
-        if not xToken:
-            print("Failed to get x-csrf-token. Site may be down. Retrying in 5...")
-
-            time.sleep(5)
-        else:
+        
+        if xToken:
             session.headers["X-CSRF-TOKEN"] = xToken
-            time.sleep(248)
+
+        time.sleep(248)
 
 
 def buyLimited(info, productId, limited):
@@ -170,6 +170,7 @@ def checkLimiteds():
         except KeyError:
             print("Rate limited")
             time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
+            start += (60-int(datetime.datetime.now().second))
             continue
 
         if limitedInfo.get("priceStatus", "") != "Off Sale" and limitedInfo.get("collectibleItemId") is not None:
@@ -209,7 +210,7 @@ if __name__ == "__main__":
 
     totalCooldown = len(limiteds) * perCooldown
 
-    
+    global start
 
     while True:
         start = time.perf_counter()
