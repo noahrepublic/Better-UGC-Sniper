@@ -19,9 +19,32 @@ limiteds = []
 global start
 start = 0
 
+global proxyIndex
+proxyIndex = 0
+global proxiesEnabled
+proxiesEnabled = False
+
+global proxiesLength
+proxiesLength = 0
+
 with open("limiteds.txt", "r") as f:
     limiteds = f.read().replace(" ", "").replace("\n", "").split(",")
 
+
+with open("proxies.txt", "r") as f:
+    proxies = f.read().replace(" ", "").split("\n")
+    for proxy in proxies:
+        if proxy == "":
+            proxies.remove(proxy)
+
+    proxiesLength = len(proxies)
+    
+    if proxiesLength > 0:
+        proxiesEnabled = True
+        print("Proxies enabled.")
+        print(f"Loaded {len(proxies)} proxies.")
+    else:
+        print("Proxies disabled.")
 
 def getCookie():
     global cookie
@@ -88,7 +111,6 @@ def getXToken():
             
             xToken = response.headers["x-csrf-token"]
 
-            reserveRequests = False
         except:
             xToken = None
 
@@ -98,6 +120,18 @@ def getXToken():
 
         time.sleep(248)
 
+
+def getProxy():
+    global proxyIndex
+
+    if proxyIndex >= proxiesLength - 1:
+        proxyIndex = 0
+    else:
+        proxyIndex += 1
+
+    proxy = proxies[proxyIndex]
+
+    return proxy
 
 def buyLimited(info, productId, limited):
     itemId = info["collectibleItemId"]
@@ -117,23 +151,38 @@ def buyLimited(info, productId, limited):
 
     available = True
 
+    global proxiesEnabled
+    global proxiesLength
+
     while available:
         data["idempotencyKey"] = str(uuid.uuid4())
+        print("Trying to buy " + info["name"])
+        if proxiesEnabled:
+            proxy = getProxy()
+            session.proxies = {"http": proxy, "https": proxy}
         
         response = r.post(
-            f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item", json=data, cookies=session.cookies, headers=session.headers)
+            f"https://apis.roblox.com/marketplace-sales/v1/item/{itemId}/purchase-item", json=data, cookies=session.cookies, headers=session.headers, proxies=session.proxies)
 
         if response.status_code == 429:
-            print("Rate limited")
+       
+            if proxiesEnabled:
+                print("Rate limited, Switching proxy")
+                continue
+            else:
+                print("Rate limited")
             time.sleep(0.25)
  
         if response.status_code == 503:
             print("Out of stock! Or website crashed")
 
             # validate if it's out of stock or not
-
-            info = session.post("https://catalog.roblox.com/v1/catalog/items/details",
-                      json={"items": [{"itemType": "Asset", "id": int(limited)}]})
+            try:
+                info = session.post("https://catalog.roblox.com/v1/catalog/items/details",
+                        json={"items": [{"itemType": "Asset", "id": int(limited)}]})
+            except:
+                print("Is your limiteds.txt file empty?")
+                exit(0)
             
             try:
                 left = info.json()["data"][0]["unitsAvailableForConsumption"]
@@ -168,15 +217,26 @@ def checkLimiteds():
 
 
     global start
-
     for limited in limiteds:
-
         try:
             limitedInfo = session.post("https://catalog.roblox.com/v1/catalog/items/details",
-                           json={"items": [{"itemType": "Asset", "id": int(limited)}]}).json()["data"][0]
-            
+                           json={"items": [{"itemType": "Asset", "id": int(limited)}]}, timeout=2).json()["data"][0]
+        except r.Timeout:
+            if proxiesEnabled:
+                print("Proxy timed out (bad proxy), switching proxy")
+            continue
+        except r.ConnectionError:
+            if proxiesEnabled:
+                print("Proxy timed out (bad proxy), switching proxy, connection error")
+            continue
+        
         except KeyError:
-            print("Rate limited")
+            
+            if proxiesEnabled:
+                print("Rate limited, Switching proxy (Might be a bad proxy)")
+                continue
+            else:
+                print("Rate limited")
             start += (60-int(datetime.datetime.now().second))
             time.sleep(60-int(datetime.datetime.now().second)) # https://devforum.roblox.com/t/what-are-the-roblox-ratelimits-or-how-can-i-handle-them/1596921/8
           
@@ -184,7 +244,7 @@ def checkLimiteds():
 
         if limitedInfo.get("priceStatus", "") != "Off Sale" and limitedInfo.get("collectibleItemId") is not None:
             productId = session.post("https://apis.roblox.com/marketplace-items/v1/items/details",
-                    json={"itemIds": [limitedInfo["collectibleItemId"]]})
+                    json={"itemIds": [limitedInfo["collectibleItemId"]]}, timeout=3)
         
             try:
                 productId = productId.json()[0]["collectibleProductId"]
@@ -209,13 +269,16 @@ if __name__ == "__main__":
     session = r.Session()
     session.cookies[".ROBLOSECURITY"] = cookie
 
+    session.headers["User-Agent"] = "Roblox/WinInet"
+
 
     Thread(target=getXToken).start()
 
     while not session.headers.get("X-CSRF-TOKEN", ""): # Wait for the xToken to be set
         time.sleep(0.1)
 
-    
+    if proxiesEnabled:
+        session.proxies = {"http": proxies[proxyIndex], "https": proxies[proxyIndex]}
 
     totalCooldown = len(limiteds) * perCooldown
 
@@ -232,5 +295,10 @@ if __name__ == "__main__":
 
         os.system("cls")
         print("Time taken: " + str(round(time.perf_counter()-start, 4)))
+
+        if proxiesEnabled:
+            print("Proxy: " + proxies[proxyIndex])
+            proxy = getProxy()
+            session.proxies = {"http": proxy, "https": proxy}
         
     
