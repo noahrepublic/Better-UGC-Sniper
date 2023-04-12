@@ -36,3 +36,7 @@ It should bring you to the configuration, fill that out.
 ## Run
 
 Open the batch file again, and this time press 2
+
+## Proxies?
+
+Free proxies suck so only really recommended with paid ones. If you are using proxies they _MUST_ be the same country, otherwise it invalids your cookie
