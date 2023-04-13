@@ -5,6 +5,7 @@ python ./scripts/startcheck.py
 :ui
 cls
 title UGC-Sniper Config Editor by noahrepublic#4323
+echo THE NEW DISCORD: https://discord.gg/hw2ttCnmdz
 echo option select
 echo.
 echo [1] - Configure Sniper

@@ -9,7 +9,7 @@ import queue
 
 os.system("cls")
 
-print("UGC Sniper by noahrepublic#4323, support server: https://discord.com/invite/Kk8n2QpFCb")
+print("UGC Sniper Premium Edition by noahrepublic#4323, support server: https://discord.com/invite/Kk8n2QpFCb")
 print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
 
@@ -295,6 +295,7 @@ if __name__ == "__main__":
 
         os.system("cls")
         print("Time taken: " + str(round(time.perf_counter()-start, 4)))
+        print("OLD SERVER DISABLED JOIN THE NEW ONE: https://discord.gg/hw2ttCnmdz")
 
         if proxiesEnabled:
             print("Proxy: " + proxies[proxyIndex])
