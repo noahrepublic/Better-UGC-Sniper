@@ -295,7 +295,7 @@ if __name__ == "__main__":
 
         os.system("cls")
         print("Time taken: " + str(round(time.perf_counter()-start, 4)))
-        print("OLD SERVER DISABLED JOIN THE NEW ONE: https://discord.gg/hw2ttCnmdz")
+
 
         if proxiesEnabled:
             print("Proxy: " + proxies[proxyIndex])
