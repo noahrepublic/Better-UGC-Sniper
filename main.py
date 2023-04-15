@@ -9,7 +9,7 @@ import queue
 
 os.system("cls")
 
-print("Better UGC Sniper by noahrepublic#4323, support server: https://discord.gg/hw2ttCnmdz")
+print("Better UGC Sniper by NoahDevelops#2502, support server: https://discord.gg/hw2ttCnmdz")
 print("https://github.com/noahrepublic/Better-UGC-Sniper")
 
 
