@@ -7,13 +7,9 @@ Open sourced UGC Sniper
 
 ## 1. Download the repository
 
-Hit the large green "Code" button
+### Download from the releases your operating systems download zip
 
-![alt text](https://github.com/noahrepublic/Better-UGC-Sniper/blob/main/guide-images/CodeBtn.png?raw=true)
-
-Download it as a zip folder
-
-![alt text](https://github.com/noahrepublic/Better-UGC-Sniper/blob/main/guide-images/DownloadZIP.png?raw=true)
+https://github.com/noahrepublic/Better-UGC-Sniper/releases
 
 ### Extract the zip file to your desired directory
 
