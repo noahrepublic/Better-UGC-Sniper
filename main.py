@@ -68,37 +68,9 @@ def getCookie():
         userId = r.get("https://users.roblox.com/v1/users/authenticated",
                        cookies={".ROBLOSECURITY": cookie}).json()["id"]
     except:
-        print("ROBLOSECURITY is invalid, trying to find ROBLOSECURITY in registry...")
-        cookie = None
-
-    if cookie == None:
-
-        try:
-            import winreg
-
-            path = winreg.HKEY_CURRENT_USER
-            robloxcom = winreg.OpenKeyEx(
-                path, r"SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com")
-
-            cookie = str(winreg.QueryValueEx(robloxcom, ".ROBLOSECURITY")[0])
-        except:
-            print(
-                "Regex failed, either isn't supported on your system or you are not logged in studio.")
-            cookie = None
-
-        if cookie:
-            cookie = cookie.split("<")[3]
-            cookie = cookie.split(">")[0]
-            cookie = cookie.strip()
-
-            try:
-                userId = r.get("https://users.roblox.com/v1/users/authenticated",
-                               cookies={".ROBLOSECURITY": cookie}).json()["id"]
-                print("Automatically found ROBLOSECURITY.")
-            except:
-                print(
-                    "Could not automatically find ROBLOSECURITY. Please enter it manually.")
-                exit(0)
+        print("Invalid cookie")
+        input("Press enter to exit...")
+        exit(0)
 
 
 def getXToken():
