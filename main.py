@@ -7,7 +7,7 @@ import time
 import datetime
 import queue
 
-os.system("cls")
+os.system('cls' if os.name == 'nt' else 'clear')
 
 print("Better UGC Sniper by NoahDevelops#2502, support server: https://discord.gg/hw2ttCnmdz")
 print("https://github.com/noahrepublic/Better-UGC-Sniper")
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         if end - start < totalCooldown:
             time.sleep(totalCooldown - (end - start))
 
-        os.system("cls")
+        os.system('cls' if os.name == 'nt' else 'clear')
         print("Time taken: " + str(round(time.perf_counter()-start, 4)))
 
 
