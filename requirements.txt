@@ -1,1 +1,3 @@
-requests
+httpx
+discord-webhook[async]
+asyncio

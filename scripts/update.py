@@ -1,4 +1,4 @@
-import requests as r
+import httpx as r
 
 print("Checking for updates...")
 script = r.get("https://raw.githubusercontent.com/noahrepublic/Better-UGC-Sniper/main/main.py").text

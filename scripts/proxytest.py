@@ -1,8 +1,7 @@
 import queue
-import requests as r
+import httpx as r
 from threading import Thread
 from concurrent.futures.thread import ThreadPoolExecutor
-import time
 import os
 
 proxies = queue.Queue()
