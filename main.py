@@ -313,12 +313,35 @@ class Sniper:
                 
                 try:
                     response = await session.post("https://catalog.roblox.com/v1/catalog/items/details", json={"items": [{"itemType": "Asset", "id": int(id)} for id in self.items]})
+                    limitedsInfo = response.json()["data"]
                 except httpx.ConnectTimeout:
                     if self.proxiesEnabled:
                         print("Proxy timed out")
                     else:
                         print("Connection timed out")
                     continue
+                except KeyError:
+                    if self.proxiesEnabled:
+                        print("Proxy failed to connect")
+                    else:
+                        print(response.text)
+
+                        ##logging.debug(f"Failed to get limiteds info: {response.text}")
+                        if response.status_code == 403:
+                            response = await self.getXToken(currentAccount[".ROBLOSECURITY"])
+                            currentAccount["x-csrf-token"] = response["x-csrf-token"]
+                            currentAccount["created"] = response["created"]
+                        continue
+                except Exception as e:
+                    ##logging.debug(f"Failed to get limiteds info: {e}")
+                    if response.status_code == 403:
+                            response = await self.getXToken(currentAccount[".ROBLOSECURITY"])
+                            currentAccount["x-csrf-token"] = response["x-csrf-token"]
+                            currentAccount["created"] = response["created"]
+                    continue
+
+
+                
 
                 if response.status_code == 429:
                     if self.proxiesEnabled:
@@ -327,11 +350,7 @@ class Sniper:
                     print("Rate limited, waiting to end")
                     continue # it will start rate limit check
 
-                try:
-                    limitedsInfo = response.json()["data"]
-                except:
-                    print("Failed to decode JSON")
-                    continue
+               
                 validForProductIds = []
 
                 for limited in limitedsInfo:
@@ -339,6 +358,7 @@ class Sniper:
                         continue
 
                     if limited.get("unitsAvailableForConsumption", 0) == 0:
+                        self.soldOut.append(str(limited["id"]))
                         if str(limited["id"]) in self.items:
                             self.items.remove(str(limited["id"]))
 
@@ -367,6 +387,8 @@ class Sniper:
                         for account in self.accountHandler.accounts:
                             tasks.append(self.buy(info, info["id"], account)) 
 
+                        
+                        await sio.emit("new-limited", {"id": info["id"], "name": info["name"], "productId": info["productId"], "collectibleItemId": info["collectibleItemId"], "creatorTargetId": info["creatorTargetId"]})
 
                     await asyncio.gather(*tasks)
             
@@ -376,6 +398,7 @@ class Sniper:
 
             print("Checked", round(end - start, 2), "seconds")
             await asyncio.sleep(self.cooldown)
+
 
     async def autoPrint(self):
         while True:
