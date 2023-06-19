@@ -357,14 +357,12 @@ class Sniper:
                     if limited.get("price") is None:
                         continue
 
-                    if limited.get("unitsAvailableForConsumption", 0) == 0:
-                        self.soldOut.append(str(limited["id"]))
-                        if str(limited["id"]) in self.items:
-                            self.items.remove(str(limited["id"]))
+                    if limited.get("unitsAvailableForConsumption", 0) 
+                        print("Out of stock")
+                        continue
 
                     if limited.get("price") > 0:
-                        self.items.remove(str(limited["id"]))
-                        print("Item is not free, removing from list")
+                        print("Item is not free")
                         continue
 
                     if limited.get("priceStatus") != "Off Sale" and limited.get("unitsAvailableForConsumption", 0) > 0 and limited.get("collectibleItemId"):
