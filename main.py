@@ -357,7 +357,7 @@ class Sniper:
                     if limited.get("price") is None:
                         continue
 
-                    if limited.get("unitsAvailableForConsumption", 0) 
+                    if limited.get("unitsAvailableForConsumption", 0):
                         print("Out of stock")
                         continue
 
