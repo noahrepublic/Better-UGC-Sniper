@@ -1,4 +1,4 @@
-
+![Downloads](https://img.shields.io/github/downloads/noahrepublic/Better-UGC-Sniper/total?)
 # [Better-UGC-Sniper](https://discord.gg/Kk8n2QpFCb)
 
 Open sourced UGC Sniper
