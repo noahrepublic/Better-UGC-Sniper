@@ -297,7 +297,7 @@ class Sniper:
 
     async def search(self):
         while True:
-            if self.proxiesEnabled and self.proxiesLength > self.maxPrice:
+            if self.proxiesEnabled and self.proxiesLength > 0:
                 proxy = f"http://{await self.proxyHandler.rotate()}"
             else:
                 proxy = None
@@ -363,7 +363,8 @@ class Sniper:
                         continue
 
                     if limited.get("price") > self.maxPrice:
-                        print("Item is over budget")
+                        self.items.remove(str(limited["id"]))
+                        print("Item is over budget, removing from list")
                         continue
 
                     if limited.get("priceStatus") != "Off Sale" and limited.get("unitsAvailableForConsumption", 0) > 0 and limited.get("collectibleItemId"):
