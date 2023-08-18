@@ -38,6 +38,7 @@ class Sniper:
         
         self.maxPrice = 0 # Temporary, might add per item
 
+
         # Information prints
 
         self.checks = 0
@@ -184,7 +185,7 @@ class Sniper:
                 if config["discordWebhook"] != "" and config["discordWebhook"] != None:
                     self.discordWebhook = config["discordWebhook"]
                 
-                
+                self.maxPrice = account["budget"]
                 for item in config["Items"]:
                     if not item["id"]:
                         continue
@@ -296,7 +297,7 @@ class Sniper:
 
     async def search(self):
         while True:
-            if self.proxiesEnabled and self.proxiesLength > 0:
+            if self.proxiesEnabled and self.proxiesLength > self.maxPrice:
                 proxy = f"http://{await self.proxyHandler.rotate()}"
             else:
                 proxy = None
@@ -313,12 +314,35 @@ class Sniper:
                 
                 try:
                     response = await session.post("https://catalog.roblox.com/v1/catalog/items/details", json={"items": [{"itemType": "Asset", "id": int(id)} for id in self.items]})
+                    limitedsInfo = response.json()["data"]
                 except httpx.ConnectTimeout:
                     if self.proxiesEnabled:
                         print("Proxy timed out")
                     else:
                         print("Connection timed out")
                     continue
+                except KeyError:
+                    if self.proxiesEnabled:
+                        print("Proxy failed to connect")
+                    else:
+                        print(response.text)
+
+                        ##logging.debug(f"Failed to get limiteds info: {response.text}")
+                        if response.status_code == 403:
+                            response = await self.getXToken(currentAccount[".ROBLOSECURITY"])
+                            currentAccount["x-csrf-token"] = response["x-csrf-token"]
+                            currentAccount["created"] = response["created"]
+                        continue
+                except Exception as e:
+                    ##logging.debug(f"Failed to get limiteds info: {e}")
+                    if response.status_code == 403:
+                            response = await self.getXToken(currentAccount[".ROBLOSECURITY"])
+                            currentAccount["x-csrf-token"] = response["x-csrf-token"]
+                            currentAccount["created"] = response["created"]
+                    continue
+
+
+                
 
                 if response.status_code == 429:
                     if self.proxiesEnabled:
@@ -327,24 +351,19 @@ class Sniper:
                     print("Rate limited, waiting to end")
                     continue # it will start rate limit check
 
-                try:
-                    limitedsInfo = response.json()["data"]
-                except:
-                    print("Failed to decode JSON")
-                    continue
+               
                 validForProductIds = []
 
                 for limited in limitedsInfo:
                     if limited.get("price") is None:
                         continue
 
-                    if limited.get("unitsAvailableForConsumption", 0) == 0:
-                        if str(limited["id"]) in self.items:
-                            self.items.remove(str(limited["id"]))
+                    if limited.get("unitsAvailableForConsumption", 0):
+                        print("Out of stock")
+                        continue
 
-                    if limited.get("price") > 0:
-                        self.items.remove(str(limited["id"]))
-                        print("Item is not free, removing from list")
+                    if limited.get("price") > self.maxPrice:
+                        print("Item is over budget")
                         continue
 
                     if limited.get("priceStatus") != "Off Sale" and limited.get("unitsAvailableForConsumption", 0) > 0 and limited.get("collectibleItemId"):
@@ -376,6 +395,7 @@ class Sniper:
 
             print("Checked", round(end - start, 2), "seconds")
             await asyncio.sleep(self.cooldown)
+
 
     async def autoPrint(self):
         while True:

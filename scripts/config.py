@@ -57,7 +57,8 @@ print("What would you like to edit? \n"
         "4. Remove account \n"
         "5. Cooldown \n"
         "6. Discord webhook \n"
-        "7. Exit")
+        "7. Budget \n"
+        "8. Exit")
 
 choice = int(input(""))
 if choice == 1:
@@ -172,6 +173,11 @@ elif choice == 5:
 elif choice == 6:
     discordWebhook = str(input("Enter Discord webhook (Leave blank for none): "))
     config["discordWebhook"] = discordWebhook
+    jsonObject = json.dumps(config, indent=4)
+elif choice == 7:
+    budget = int(input("Enter budget: "))
+
+    config["budget"] = budget
     jsonObject = json.dumps(config, indent=4)
 else:
     exit(0)
